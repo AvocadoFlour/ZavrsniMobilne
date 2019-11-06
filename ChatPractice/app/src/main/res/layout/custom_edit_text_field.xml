@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true">
+
+    <EditText
+        android:paddingLeft="20dp"
+        android:focusable="true"
+        android:id="@+id/customEditTextBoxMain"
+        android:hint="PlaceolderMain"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@android:color/white"
+        android:ems="10"
+        android:inputType="textPersonName"/>
+
+    <View
+        android:visibility="gone"
+        android:id="@+id/redLine"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/holo_red_light"/>
+
+    <TextView
+        android:visibility="gone"
+        android:textSize="10dp"
+        android:id="@+id/customEditTextBoxHint"
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:background="@android:color/holo_red_light"
+        android:hint="PlaceolderHint"
+        android:paddingLeft="20dp"
+        android:includeFontPadding="false"
+        android:gravity="left"
+        android:textColor="@android:color/background_light"/>
+</LinearLayout>

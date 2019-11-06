@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "162766149264",
+    "firebase_url": "https://kotlinmessenger-10394.firebaseio.com",
+    "project_id": "kotlinmessenger-10394",
+    "storage_bucket": "kotlinmessenger-10394.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:162766149264:android:72e4f195d63574110e6a15",
+        "android_client_info": {
+          "package_name": "hr.tomislav.stipic.chatpractice"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "162766149264-02sj1nm4699gasj0q5sffn9hpp94okd6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXYQ19l585sl2agwbD7Qbrm6B_pzhD-dE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "162766149264-02sj1nm4699gasj0q5sffn9hpp94okd6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
