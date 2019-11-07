@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Horse chat</string>
+    <string name="rael_hint">Input a valid email not associated with another account</string>
+    <string name="raul_hint">Make up a username. Try to be unique? :)</string>
+    <string name="rapl_hint">Your password needs to be longer than 6 characters</string>
+    <string name="rarpl_hint">It needs to match</string>
+</resources>
