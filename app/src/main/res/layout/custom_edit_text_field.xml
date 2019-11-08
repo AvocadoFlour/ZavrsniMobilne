@@ -10,7 +10,7 @@
     <FrameLayout
         android:id="@+id/custom_edit_frame_layout_container"
         android:layout_width="match_parent"
-        android:layout_height="36dp"
+        android:layout_height="40dp"
         android:orientation="horizontal"
         android:animateLayoutChanges="true">
 
@@ -18,7 +18,7 @@
             android:id="@+id/customEditTextBoxMain"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/white"
+            android:background="@drawable/rounded_custom_edit_text_main"
             android:ems="10"
             android:focusable="true"
             android:hint="PlaceolderMain"
@@ -26,33 +26,37 @@
             android:paddingLeft="20dp" />
 
         <ImageView
-            android:visibility="gone"
             android:id="@+id/imageView"
-            android:layout_width="36dp"
-            android:layout_height="wrap_content"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_gravity="right"
-            android:padding="3dp"
+            android:padding="5dp"
+            android:visibility="gone"
             app:srcCompat="@mipmap/exclamation_icon" />
 
     </FrameLayout>
 
-    <View
-        android:visibility="gone"
-        android:id="@+id/redLine"
+    <LinearLayout
+        android:id="@+id/custom_edit_linear_layout_hint_container"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/holo_red_light"/>
+        android:layout_height="16dp"
+        android:weightSum="1"
+        android:visibility="gone"
+        android:gravity="center"
+        android:orientation="horizontal">
 
-    <TextView
-        android:visibility="gone"
-        android:textSize="10dp"
-        android:id="@+id/customEditTextBoxHint"
-        android:layout_width="match_parent"
-        android:layout_height="14dp"
-        android:background="@android:color/holo_red_light"
-        android:hint="PlaceolderHint"
-        android:paddingLeft="20dp"
-        android:includeFontPadding="false"
-        android:gravity="left"
-        android:textColor="@android:color/background_light"/>
+        <TextView
+            android:id="@+id/customEditTextBoxHint"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.85"
+            android:background="@drawable/rounded_custom_edit_text_hint_text_view"
+            android:gravity="left"
+            android:hint="PlaceolderHint"
+            android:paddingLeft="20dp"
+            android:textColor="@android:color/background_light"
+            android:textSize="10dp" />
+
+    </LinearLayout>
+
 </LinearLayout>

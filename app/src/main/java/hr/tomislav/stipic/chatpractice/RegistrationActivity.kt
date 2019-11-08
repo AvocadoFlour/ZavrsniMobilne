@@ -1,43 +1,46 @@
 package hr.tomislav.stipic.chatpractice
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.opengl.Visibility
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.shapes.Shape
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.view.ViewParent
-import android.webkit.WebView
 import android.widget.*
-import androidx.appcompat.widget.WithHint
-import androidx.core.text.set
-import androidx.core.view.updateLayoutParams
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.android.synthetic.main.activity_login.view.*
 import kotlinx.android.synthetic.main.activity_registration.*
 import kotlinx.android.synthetic.main.custom_edit_text_field.view.*
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.text.InputType
-import android.view.inputmethod.InputMethodManager
+import androidx.core.graphics.drawable.toDrawable
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
+import java.util.*
 
 
 class RegistrationActivity : AppCompatActivity() {
 
-    var scale = 0f
-    var b: Boolean = false
+    private val tag = "RADebug"
+    private var scale = 0f
+    var usernameCheck: Boolean = false
+    var emailCheck: Boolean = false
+    var passwordCheck: Boolean = false
+    var passwordRepeatCheck: Boolean = false
     private lateinit var hint: String
     private lateinit var auth: FirebaseAuth
-    private lateinit var email: String
-    private lateinit var password: String
-    private lateinit var username: String
+    private var email = "emptyemail"
+    private var password = "emptypassword"
+    private var username = "emptyusername"
     private lateinit var raul: LinearLayout
     private lateinit var rael: LinearLayout
     private lateinit var rapl: LinearLayout
@@ -86,6 +89,27 @@ class RegistrationActivity : AppCompatActivity() {
                 hint = view.customEditTextBoxMain.hint as String }
             onEditTextAnimation(view, b, hint, scale) }
 
+
+        // Check if the inputted username is valid
+        raul.customEditTextBoxMain.addTextChangedListener(object:
+            TextWatcher {override fun afterTextChanged(s: Editable?) {
+        }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s!!.length in 1..7) {
+                    raul.customEditTextBoxHint.text = getString(R.string.username_too_short)
+                    raul.imageView.visibility = View.VISIBLE
+                    usernameCheck = false
+                } else {
+                    raul.customEditTextBoxHint.text = getString(R.string.raul_hint)
+                    raul.imageView.visibility = View.GONE
+                    usernameCheck = true
+                }
+                username = s.toString()
+            }
+        })
+
         // Check if the email address entered is valid
         rael.customEditTextBoxMain.addTextChangedListener(object:TextWatcher{override fun afterTextChanged(s: Editable?) {
         }
@@ -96,15 +120,15 @@ class RegistrationActivity : AppCompatActivity() {
                 // "s:" je unos u taj editText u tom potezu
                 // "start:" je broj znakova trenutno u polju u tom potezu. Ovo ne radi baš kako spada odnosno nisi to točno shvatio
                 // "before" je broj izbrisanih znakova u potezu
-                if (s!!.length > 5) {
+                if (s!!.isNotEmpty()) {
                     if(!s.toString().isEmailValid()) {
-                        Log.d("VALID EMAIL", s.toString())
-                        rael.customEditTextBoxHint.setText("Invalid email")
+                        rael.customEditTextBoxHint.text = getString(R.string.invalid_email)
                         rael.imageView.visibility = View.VISIBLE
-                        b = false
+                        emailCheck = false
                     } else {
                         resetReal()
-                        b = true
+                        emailCheck = true
+                        email = s.toString()
                     }
                 } else {
                     resetReal()
@@ -112,20 +136,20 @@ class RegistrationActivity : AppCompatActivity() {
             }
         })
 
-        //Check if the inputted password is valid
+        // Check if the inputted password is valid
         rapl.customEditTextBoxMain.addTextChangedListener(object:TextWatcher{override fun afterTextChanged(s: Editable?) {
         }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (s?.length in 1..6) {
-                    rapl.customEditTextBoxHint.setText("Password too short!")
+                    rapl.customEditTextBoxHint.setText(R.string.password_too_short)
                     rapl.imageView.visibility = View.VISIBLE
-                    b = false
+                    passwordCheck = false
                 } else {
-                    rapl.customEditTextBoxHint.setText(getString(R.string.rapl_hint))
+                    rapl.customEditTextBoxHint.text = getString(R.string.rapl_hint)
                     rapl.imageView.visibility = View.GONE
-                    b = true
+                    passwordCheck = true
                 }
                 password = s.toString()
             }
@@ -138,45 +162,54 @@ class RegistrationActivity : AppCompatActivity() {
             }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if ((s.toString() == password).not()) {
-                    rarpl.customEditTextBoxHint.setText("Password not matching the above one")
+                    rarpl.customEditTextBoxHint.text = getString(R.string.password_not_matching)
                     rarpl.imageView.visibility = View.VISIBLE
-                    b = false
+                    passwordRepeatCheck = false
                 } else {
-                    rarpl.customEditTextBoxHint.setText(getString(R.string.rarpl_hint))
+                    rarpl.customEditTextBoxHint.text = getString(R.string.rarpl_hint)
                     rarpl.imageView.visibility = View.GONE
-                    b = true
+                    passwordRepeatCheck = true
                 }
             }
         })
 
-
-        // jiken1.customEditTextBoxMain.setText("WTF")
-
         registration_register_button.setOnClickListener {
-            //notEmptyInput()
+            if (!emailCheck || !passwordCheck || !passwordRepeatCheck) {
+                Toast.makeText(baseContext, "Please fill out the form as God commands!",  Toast.LENGTH_LONG).show()
+            } else {
+                registerButtonAction()
+                registration_register_button.isEnabled = false
+            }
+        }
+
+        picture_button.setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "image/*"
+            startActivityForResult(intent, 0)
         }
 
     }
 
-    fun notEmptyInput() {
+    var selectedPhotoUri: Uri? = null
 
-        username = raul.customEditTextBoxMain.text.toString()
-        email = rael.customEditTextBoxMain.text.toString()
-        password = rapl.customEditTextBoxMain.text.toString()
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-        if (username.isEmpty() || email.isEmpty() || password.isEmpty())
-        {
-            Toast.makeText(baseContext, "None of the fields may be left empty",  Toast.LENGTH_LONG).show()
-            return
+        if (requestCode == 0 && resultCode == Activity.RESULT_OK && data != null) {
+            // provjera odabrane slike
+
+            selectedPhotoUri = data.data
+
+            val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, selectedPhotoUri)
+            registration_activity_picture_view.setImageBitmap(bitmap)
         }
-
-        registerButtonAction()
     }
 
-    fun goToLogin() {
-        Log.d("Main activity", "Try to show login activity")
+    private fun goToLogin() {
+        Log.d(tag, "Try to show login activity")
         // launch the login activity
         val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }
 
@@ -185,7 +218,7 @@ class RegistrationActivity : AppCompatActivity() {
         return !TextUtils.isEmpty(this) && android.util.Patterns.EMAIL_ADDRESS.matcher(this).matches()
     }
 
-    fun registerButtonAction() {
+    private fun registerButtonAction() {
 
         // Firebase Authentication to create a user with email and password
         // Initialize Firebase Auth
@@ -195,26 +228,79 @@ class RegistrationActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
-                    Log.d("Registration activity", "createUserWithEmail:success. UserID = ${task.result?.user?.uid}")
+                    Log.d(tag, "createUserWithEmail:success. UserID = ${task.result?.user?.uid}")
                     val user = auth.currentUser
-                    goToLogin()
-                    finish()
+
+                    uploadImageToFirebaseStorage()
                     // Update UI
                     //updateUI(user)
                 } else {
 
                     // If sign in fails, display a message to the user.
-                    Log.w("Registration activity", "createUserWithEmail:failure", task.exception)
+                    Log.w(tag, "createUserWithEmail:failure", task.exception)
                     Toast.makeText(
                         baseContext, "Authentication failed. ${task.exception?.message}",
                         Toast.LENGTH_LONG
                     ).show()
-
+                    registration_register_button.isEnabled = true
                     //updateUI(null)
                 }
             }
     }
 
+    private fun uploadImageToFirebaseStorage() {
+
+        // Ukoliko nije odabrana slika onda se ovo preskače da ne bi došlo do rušenja
+        if (selectedPhotoUri != null) {
+
+            // Pohranjivanje slike sa jedinstvenim imenom datoteke na server
+            val filename = UUID.randomUUID().toString()
+            val storageReference = FirebaseStorage.getInstance().getReference("/images/$filename")
+            storageReference.putFile(selectedPhotoUri!!)
+                .addOnSuccessListener {
+                    Log.d(tag, "Successfully uploaded image: ${it.metadata?.path}")
+
+                    // Dohvati url slike koja je uploadana, doslovno link do slike
+                    storageReference.downloadUrl.addOnSuccessListener {
+                        it.toString()
+                        Log.d(tag, "File location: $it")
+
+                        saveUserToFirebaseDatebase(it.toString())
+                    }
+                }
+                .addOnFailureListener {
+                    Log.d(tag, "Image upload unsuccessful")
+                }
+        } else saveUserToFirebaseDatebase("No picture")
+    }
+
+    private fun saveUserToFirebaseDatebase(profileImageUrl: String) {
+        val uid = FirebaseAuth.getInstance().uid as String
+        val ref = FirebaseDatabase.getInstance().getReference("/user/$uid")
+
+        val user = User(uid, username, profileImageUrl)
+
+        ref.setValue(user)
+            .addOnSuccessListener {
+                Log.d(tag, "Finally we saved the user to Firebase Databse")
+
+                val intent = Intent(this, MessagesActivity::class.java)
+
+                // Without using this line of code, pressing back will go back into RegistrationActivity,
+                // while with the line below, it will go to the desktop of your device
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK.or(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            }
+            .addOnFailureListener {
+                Log.d(tag, "User-to-database push unsuccessful: ${it.message}")
+                Toast.makeText(baseContext, "Registration failed: ${it.message}", Toast.LENGTH_LONG).show()
+                registration_register_button.isEnabled = true
+            }
+    }
+
+    //____________________________________________________________________________________________
+    // HAVING FUN HAVING FUN HAVING FUN HAVING FUN HAVING FUN HAVING FUN HAVING FUN HAVING FUN
+    //____________________________________________________________________________________________
     // Companion objects are a way to mimic Java static methods in Kotlin
     companion object {
 
@@ -224,37 +310,34 @@ class RegistrationActivity : AppCompatActivity() {
         fun onEditTextAnimation(view: View, b: Boolean, h: String, scale: Float) {
             val r = view.parent as FrameLayout
             val l = r.parent as LinearLayout
+            var g: GradientDrawable = r.customEditTextBoxMain.background as GradientDrawable
             if (b) {
                 r.customEditTextBoxMain.hint = ""
-                //r.custom_edit_frame_layout_container.layoutParams.height = pxToDP(37, scale)
-                //l.customEditTextBoxHint.layoutParams.height = pxToDP(13, scale)
-                l.customEditTextBoxHint.visibility = View.VISIBLE
-                l.redLine.visibility = View.VISIBLE
+                g.setStroke(pxToDP(2, scale), Color.parseColor("#ffcc0000"))
+                l.custom_edit_linear_layout_hint_container.visibility = View.VISIBLE
             }
             if (!b) {
+                g.setStroke(pxToDP(2, scale), Color.parseColor("#B1BCBE"))
                 r.customEditTextBoxMain.hint = h
-                //r.custom_edit_frame_layout_container.layoutParams.height = pxToDP(50, scale)
-                l.customEditTextBoxHint.visibility = View.GONE
-                l.redLine.visibility = View.GONE
+                l.custom_edit_linear_layout_hint_container.visibility = View.GONE
             }
         }
     }
 
     fun getLayoutId(l: LinearLayout): String {
-        var name =l.context.resources.getResourceEntryName(l.id)
-        Log.d("TESTESTEST", name)
         return l.context.resources.getResourceEntryName(l.id)
     }
 
 
     // Initialise UI elements
-    fun setupView() {
+    private fun setupView() {
         raul = registration_activity_username_layout as LinearLayout
         rael = registration_activity_email_layout as LinearLayout
         rapl = registration_activity_password_layout as LinearLayout
         rarpl = registration_activity_repeat_password_layout as LinearLayout
         raul.customEditTextBoxHint.text = getString(R.string.raul_hint)
         raul.customEditTextBoxMain.hint = "Username"
+        rael.customEditTextBoxMain.inputType = InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
         rael.customEditTextBoxHint.text =  getString(R.string.rael_hint)
         rael.customEditTextBoxMain.hint = "Email"
         rapl.customEditTextBoxHint.text =  getString(R.string.rapl_hint)
@@ -267,7 +350,7 @@ class RegistrationActivity : AppCompatActivity() {
     }
 
     fun resetReal() {
-        rael.customEditTextBoxHint.setText(getString(R.string.rael_hint))
+        rael.customEditTextBoxHint.text = getString(R.string.rael_hint)
         rael.imageView.visibility = View.GONE
     }
 
