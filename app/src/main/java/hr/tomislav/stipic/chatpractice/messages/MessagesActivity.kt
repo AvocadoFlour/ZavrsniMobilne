@@ -1,12 +1,13 @@
-package hr.tomislav.stipic.chatpractice
+package hr.tomislav.stipic.chatpractice.messages
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.google.firebase.auth.FirebaseAuth
+import hr.tomislav.stipic.chatpractice.R
+import hr.tomislav.stipic.chatpractice.startScreens.RegistrationActivity
 
 class MessagesActivity : AppCompatActivity() {
 

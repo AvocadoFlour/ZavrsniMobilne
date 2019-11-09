@@ -1,13 +1,13 @@
-package hr.tomislav.stipic.chatpractice
+package hr.tomislav.stipic.chatpractice.startScreens
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import hr.tomislav.stipic.chatpractice.R
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.custom_edit_text_field.view.*
 
@@ -33,13 +33,13 @@ class LoginActivity : AppCompatActivity() {
         laul.customEditTextBoxMain.setOnFocusChangeListener { view, b ->
             if((view.customEditTextBoxMain.hint as String).isNotEmpty()) {
                 hint = view.customEditTextBoxMain.hint as String }
-            RegistrationActivity.onEditTextAnimation(view, b, hint, scale)
+            RegistrationActivity.onEditTextAnimation(view, b, hint, scale, true)
         }
 
         lapl.customEditTextBoxMain.setOnFocusChangeListener { view, b ->
             if((view.customEditTextBoxMain.hint as String).isNotEmpty()) {
                 hint = view.customEditTextBoxMain.hint as String }
-            RegistrationActivity.onEditTextAnimation(view, b, hint, scale)
+            RegistrationActivity.onEditTextAnimation(view, b, hint, scale, true)
         }
 
         login_register_redirect_text_view.setOnClickListener {

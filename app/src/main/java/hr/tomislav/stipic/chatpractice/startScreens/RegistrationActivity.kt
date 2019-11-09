@@ -1,13 +1,9 @@
-package hr.tomislav.stipic.chatpractice
+package hr.tomislav.stipic.chatpractice.startScreens
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.ShapeDrawable
-import android.graphics.drawable.shapes.Shape
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -22,10 +18,13 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_registration.*
 import kotlinx.android.synthetic.main.custom_edit_text_field.view.*
 import android.text.InputType
-import androidx.core.graphics.drawable.toDrawable
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
+import hr.tomislav.stipic.chatpractice.messages.MessagesActivity
+import hr.tomislav.stipic.chatpractice.R
+import hr.tomislav.stipic.chatpractice.objects.User
 import java.util.*
+import android.view.inputmethod.InputMethodManager
 
 
 class RegistrationActivity : AppCompatActivity() {
@@ -45,6 +44,9 @@ class RegistrationActivity : AppCompatActivity() {
     private lateinit var rael: LinearLayout
     private lateinit var rapl: LinearLayout
     private lateinit var rarpl: LinearLayout
+    private val greenColor = Color.parseColor("#228B22")
+    private val lightGreenColor = Color.parseColor("#ddffd9")
+    private val redColor = Color.parseColor("#ffcc0000")
 
     public override fun onStart() {
         super.onStart()
@@ -59,6 +61,7 @@ class RegistrationActivity : AppCompatActivity() {
 
         // Remove focus from an input field
         registration_activity_global_container.setOnClickListener {
+            hideKeyboard(this)
             window.decorView.clearFocus()
         }
 
@@ -68,29 +71,22 @@ class RegistrationActivity : AppCompatActivity() {
         // open LoginActivity if already registered
         register_already_registered_text_view.setOnClickListener { goToLogin()}
 
+        // ON USERNAME INPUT  ON USERNAME INPUT  ON USERNAME INPUT  ON USERNAME INPUT
+
         // Set on editText edit listeners for animations of the editText views
         raul.customEditTextBoxMain.setOnFocusChangeListener { view, b ->
                 if((view.customEditTextBoxMain.hint as String).isNotEmpty()) {
                     hint = view.customEditTextBoxMain.hint as String }
-            onEditTextAnimation(view, b, hint, scale) }
+            onEditTextAnimation(
+                view,
+                b,
+                hint,
+                scale,
+                usernameCheck
+            )
+        }
 
-        rael.customEditTextBoxMain.setOnFocusChangeListener { view, b ->
-            if((view.customEditTextBoxMain.hint as String).isNotEmpty()) {
-                hint = view.customEditTextBoxMain.hint as String }
-            onEditTextAnimation(view, b, hint, scale) }
-
-        rapl.customEditTextBoxMain.setOnFocusChangeListener { view, b ->
-            if((view.customEditTextBoxMain.hint as String).isNotEmpty()) {
-                hint = view.customEditTextBoxMain.hint as String }
-            onEditTextAnimation(view, b, hint, scale) }
-
-        rarpl.customEditTextBoxMain.setOnFocusChangeListener { view, b ->
-            if((view.customEditTextBoxMain.hint as String).isNotEmpty()) {
-                hint = view.customEditTextBoxMain.hint as String }
-            onEditTextAnimation(view, b, hint, scale) }
-
-
-        // Check if the inputted username is valid
+        // Check if the inputted username is valid and change the look accordingly
         raul.customEditTextBoxMain.addTextChangedListener(object:
             TextWatcher {override fun afterTextChanged(s: Editable?) {
         }
@@ -100,15 +96,55 @@ class RegistrationActivity : AppCompatActivity() {
                 if (s!!.length in 1..7) {
                     raul.customEditTextBoxHint.text = getString(R.string.username_too_short)
                     raul.imageView.visibility = View.VISIBLE
+                    val g: GradientDrawable = raul.customEditTextBoxMain.background as GradientDrawable
+                    val r:  GradientDrawable = raul.customEditTextBoxHint.background as GradientDrawable
+                    g.setStroke(
+                        pxToDP(
+                            2,
+                            scale
+                        ), redColor)
+                    r.setColor(redColor)
                     usernameCheck = false
                 } else {
                     raul.customEditTextBoxHint.text = getString(R.string.raul_hint)
                     raul.imageView.visibility = View.GONE
-                    usernameCheck = true
+
+                    raul.customEditTextBoxHint.background
+                    if (s.isNotEmpty()) {
+                        usernameCheck = true
+                    }
+                }
+                if(usernameCheck) {
+                    val g: GradientDrawable = raul.customEditTextBoxMain.background as GradientDrawable
+                    val r:  GradientDrawable = raul.customEditTextBoxHint.background as GradientDrawable
+                    g.setStroke(
+                        pxToDP(
+                            2,
+                            scale
+                        ), greenColor)
+                    g.setColor(lightGreenColor)
+                    r.setColor(greenColor)
+                } else {
+                    val g: GradientDrawable = raul.customEditTextBoxMain.background as GradientDrawable
+                    g.setColor(Color.WHITE)
                 }
                 username = s.toString()
             }
         })
+
+        //   ON EMAIL INPUT    ON EMAIL INPUT    ON EMAIL INPUT    ON EMAIL INPUT    ON EMAIL INPUT
+
+        rael.customEditTextBoxMain.setOnFocusChangeListener { view, b ->
+            if((view.customEditTextBoxMain.hint as String).isNotEmpty()) {
+                hint = view.customEditTextBoxMain.hint as String }
+            onEditTextAnimation(
+                view,
+                b,
+                hint,
+                scale,
+                emailCheck
+            )
+        }
 
         // Check if the email address entered is valid
         rael.customEditTextBoxMain.addTextChangedListener(object:TextWatcher{override fun afterTextChanged(s: Editable?) {
@@ -124,11 +160,41 @@ class RegistrationActivity : AppCompatActivity() {
                     if(!s.toString().isEmailValid()) {
                         rael.customEditTextBoxHint.text = getString(R.string.invalid_email)
                         rael.imageView.visibility = View.VISIBLE
+                        val g: GradientDrawable = rael.customEditTextBoxMain.background as GradientDrawable
+                        val r:  GradientDrawable = rael.customEditTextBoxHint.background as GradientDrawable
+                        g.setStroke(
+                            pxToDP(
+                                2,
+                                scale
+                            ), redColor)
+                        r.setColor(redColor)
                         emailCheck = false
                     } else {
                         resetReal()
-                        emailCheck = true
                         email = s.toString()
+                        val g: GradientDrawable = rael.customEditTextBoxMain.background as GradientDrawable
+                        g.setStroke(
+                            pxToDP(
+                                2,
+                                scale
+                            ), Color.parseColor("#32CD32"))
+                        if (s.isNotEmpty()) {
+                            emailCheck = true
+                        }
+                    }
+                    if(emailCheck) {
+                        val g: GradientDrawable = rael.customEditTextBoxMain.background as GradientDrawable
+                        val r:  GradientDrawable = rael.customEditTextBoxHint.background as GradientDrawable
+                        g.setStroke(
+                            pxToDP(
+                                2,
+                                scale
+                            ), greenColor)
+                        g.setColor(lightGreenColor)
+                        r.setColor(greenColor)
+                    } else {
+                        val g: GradientDrawable = rael.customEditTextBoxMain.background as GradientDrawable
+                        g.setColor(Color.WHITE)
                     }
                 } else {
                     resetReal()
@@ -136,24 +202,76 @@ class RegistrationActivity : AppCompatActivity() {
             }
         })
 
+        // ON PASSWORD INPUT  ON PASSWORD INPUT  ON PASSWORD INPUT  ON PASSWORD INPUT  ON PASSWORD INPUT
+
+        rapl.customEditTextBoxMain.setOnFocusChangeListener { view, b ->
+            if((view.customEditTextBoxMain.hint as String).isNotEmpty()) {
+                hint = view.customEditTextBoxMain.hint as String }
+            onEditTextAnimation(
+                view,
+                b,
+                hint,
+                scale,
+                passwordCheck
+            )
+        }
+
         // Check if the inputted password is valid
         rapl.customEditTextBoxMain.addTextChangedListener(object:TextWatcher{override fun afterTextChanged(s: Editable?) {
         }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (s?.length in 1..6) {
+                if (s!!.length in 1..6) {
                     rapl.customEditTextBoxHint.setText(R.string.password_too_short)
                     rapl.imageView.visibility = View.VISIBLE
+                    val g: GradientDrawable = rapl.customEditTextBoxMain.background as GradientDrawable
+                    val r:  GradientDrawable = rapl.customEditTextBoxHint.background as GradientDrawable
+                    g.setStroke(
+                        pxToDP(
+                            2,
+                            scale
+                        ), redColor)
+                    r.setColor(redColor)
                     passwordCheck = false
                 } else {
                     rapl.customEditTextBoxHint.text = getString(R.string.rapl_hint)
                     rapl.imageView.visibility = View.GONE
-                    passwordCheck = true
+                    if (s.isNotEmpty()) {
+                        passwordCheck = true
+                    }
+                }
+                if (passwordCheck) {
+                    val g: GradientDrawable = rapl.customEditTextBoxMain.background as GradientDrawable
+                    val r:  GradientDrawable = rapl.customEditTextBoxHint.background as GradientDrawable
+                    g.setStroke(
+                        pxToDP(
+                            2,
+                            scale
+                        ), greenColor)
+                    g.setColor(lightGreenColor)
+                    r.setColor(greenColor)
+                } else {
+                    val g: GradientDrawable = rapl.customEditTextBoxMain.background as GradientDrawable
+                    g.setColor(Color.WHITE)
                 }
                 password = s.toString()
             }
         })
+
+        //  ON REPEAT PASSWORD INPUT   ON REPEAT PASSWORD INPUT   ON REPEAT PASSWORD INPUT
+
+        rarpl.customEditTextBoxMain.setOnFocusChangeListener { view, b ->
+            if((view.customEditTextBoxMain.hint as String).isNotEmpty()) {
+                hint = view.customEditTextBoxMain.hint as String }
+            onEditTextAnimation(
+                view,
+                b,
+                hint,
+                scale,
+                passwordRepeatCheck
+            )
+        }
 
         // Check if the repeated password matches the initial one
         rarpl.customEditTextBoxMain.addTextChangedListener(object:TextWatcher{override fun afterTextChanged(s: Editable?) {
@@ -161,14 +279,38 @@ class RegistrationActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if ((s.toString() == password).not()) {
+                if ((s!!.toString() == password).not()) {
                     rarpl.customEditTextBoxHint.text = getString(R.string.password_not_matching)
                     rarpl.imageView.visibility = View.VISIBLE
+                    val g: GradientDrawable = rarpl.customEditTextBoxMain.background as GradientDrawable
+                    val r:  GradientDrawable = rarpl.customEditTextBoxHint.background as GradientDrawable
+                    g.setStroke(
+                        pxToDP(
+                            2,
+                            scale
+                        ), redColor)
+                    r.setColor(redColor)
                     passwordRepeatCheck = false
                 } else {
                     rarpl.customEditTextBoxHint.text = getString(R.string.rarpl_hint)
                     rarpl.imageView.visibility = View.GONE
-                    passwordRepeatCheck = true
+                    if (s.isNotEmpty()) {
+                        passwordRepeatCheck = true
+                    }
+                }
+                if (passwordRepeatCheck) {
+                    val g: GradientDrawable = rarpl.customEditTextBoxMain.background as GradientDrawable
+                    val r:  GradientDrawable = rarpl.customEditTextBoxHint.background as GradientDrawable
+                    g.setStroke(
+                        pxToDP(
+                            2,
+                            scale
+                        ), greenColor)
+                    g.setColor(lightGreenColor)
+                    r.setColor(greenColor)
+                } else {
+                    val g: GradientDrawable = rarpl.customEditTextBoxMain.background as GradientDrawable
+                    g.setColor(Color.WHITE)
                 }
             }
         })
@@ -190,7 +332,7 @@ class RegistrationActivity : AppCompatActivity() {
 
     }
 
-    var selectedPhotoUri: Uri? = null
+    private var selectedPhotoUri: Uri? = null
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -229,7 +371,7 @@ class RegistrationActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
                     Log.d(tag, "createUserWithEmail:success. UserID = ${task.result?.user?.uid}")
-                    val user = auth.currentUser
+                    // val user = auth.currentUser
 
                     uploadImageToFirebaseStorage()
                     // Update UI
@@ -304,29 +446,64 @@ class RegistrationActivity : AppCompatActivity() {
     // Companion objects are a way to mimic Java static methods in Kotlin
     companion object {
 
+        // https://stackoverflow.com/a/17789187/10299831
+        @JvmStatic
+        fun hideKeyboard(activity: Activity) {
+            val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+            //Find the currently focused view, so we can grab the correct window token from it.
+            var view = activity.currentFocus
+            //If no view currently has focus, create a new one, just so we can grab a window token from it
+            if (view == null) {
+                view = View(activity)
+            }
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+        }
+
+        @JvmStatic
         private fun pxToDP(px: Int, scale: Float): Int {
             return (px * scale + 0.5f).toInt()
         }
-        fun onEditTextAnimation(view: View, b: Boolean, h: String, scale: Float) {
+
+        @JvmStatic
+        fun onEditTextAnimation(view: View, b: Boolean, h: String, scale: Float, verification: Boolean) {
             val r = view.parent as FrameLayout
             val l = r.parent as LinearLayout
-            var g: GradientDrawable = r.customEditTextBoxMain.background as GradientDrawable
+            val g: GradientDrawable = r.customEditTextBoxMain.background as GradientDrawable
             if (b) {
                 r.customEditTextBoxMain.hint = ""
-                g.setStroke(pxToDP(2, scale), Color.parseColor("#ffcc0000"))
+                if (verification)
+                {
+                    g.setStroke(
+                        pxToDP(
+                            2,
+                            scale
+                        ), Color.parseColor("#228B22"))
+                } else {
+                    g.setStroke(
+                        pxToDP(
+                            2,
+                            scale
+                        ), Color.parseColor("#ffcc0000"))
+                }
                 l.custom_edit_linear_layout_hint_container.visibility = View.VISIBLE
             }
             if (!b) {
-                g.setStroke(pxToDP(2, scale), Color.parseColor("#B1BCBE"))
+                g.setStroke(
+                    pxToDP(
+                        2,
+                        scale
+                    ), Color.parseColor("#B1BCBE"))
                 r.customEditTextBoxMain.hint = h
                 l.custom_edit_linear_layout_hint_container.visibility = View.GONE
             }
         }
+
+        @JvmStatic
+        fun getLayoutId(l: LinearLayout): String {
+            return l.context.resources.getResourceEntryName(l.id)
+        }
     }
 
-    fun getLayoutId(l: LinearLayout): String {
-        return l.context.resources.getResourceEntryName(l.id)
-    }
 
 
     // Initialise UI elements
