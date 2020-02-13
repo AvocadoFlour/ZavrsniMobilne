@@ -8,5 +8,7 @@
     <string name="invalid_email">Invalid email</string>
     <string name="password_too_short">Password too short!</string>
     <string name="password_not_matching">Password not matching</string>
+    <string name="send">Send</string>
+    <string name="enter_message">Enter message</string>
 
 </resources>

@@ -53,6 +53,7 @@ class RegistrationActivity : AppCompatActivity() {
         scale = this.resources.displayMetrics.density
         // Check if user is signed in (non-null) and update UI accordingly.
         // val currentUser = auth.currentUser
+        Log.d("PocetakRegister", FirebaseAuth.getInstance().currentUser.toString())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

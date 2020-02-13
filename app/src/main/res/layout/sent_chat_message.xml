@@ -7,23 +7,25 @@
     android:layout_marginBottom="12dp">
 
     <TextView
-        android:id="@+id/received_chat_message_view"
+        android:id="@+id/sent_chat_message_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:background="@drawable/rounded_chat_buble_edit_text"
+        android:background="@drawable/sent_chat_buble_edit_text"
         android:maxWidth="240dp"
         android:padding="16dp"
         android:text="This is a received message. This should wrap  around its content and thus display the entire message string"
-        app:layout_constraintBottom_toBottomOf="@+id/received_chat_message_user_photo"
-        app:layout_constraintEnd_toStartOf="@+id/received_chat_message_user_photo"
-        app:layout_constraintTop_toTopOf="@+id/received_chat_message_user_photo"
+        app:layout_constraintBottom_toBottomOf="@+id/sent_chat_message_user_photo"
+        app:layout_constraintEnd_toStartOf="@+id/sent_chat_message_user_photo"
+        app:layout_constraintTop_toTopOf="@+id/sent_chat_message_user_photo"
         app:layout_constraintVertical_bias="0.0"
         app:layout_goneMarginLeft="8dp"
         app:layout_goneMarginStart="8dp" />
 
-    <ImageView
-        android:id="@+id/received_chat_message_user_photo"
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/sent_chat_message_user_photo"
+        app:civ_border_width="2dp"
+        app:civ_border_color="@android:color/black"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginTop="32dp"

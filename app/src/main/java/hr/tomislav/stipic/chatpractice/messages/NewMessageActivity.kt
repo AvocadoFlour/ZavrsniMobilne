@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -42,11 +43,14 @@ class NewMessageActivity : AppCompatActivity() {
                     Log.d("TESTESTEST", it.toString())
                     val user = it.getValue(User::class.java)
                     if (user != null) {
-                        adapter.add(UserItem(user))
+                        if (user.uid != FirebaseAuth.getInstance().uid) {
+                            adapter.add(UserItem(user))
+                        }
                     }
                 }
 
                 adapter.setOnItemClickListener {item, view ->
+
 
                     val userItem = item as UserItem
                     val intent = Intent(view.context, ChatActivity::class.java)
@@ -70,8 +74,13 @@ class UserItem(val user: User): Item<GroupieViewHolder>() {
     override fun bind(viewHolder: GroupieViewHolder, position: Int) {
         // BIt će pozivan za svaki objekt u listi
         viewHolder.itemView.new_message_layout_contact_name.text = user.username
-
-        Picasso.get().load(user.profileImageUrl).into(viewHolder.itemView.new_message_layout_contact_picture)
+        if (user.profileImageUrl == "No picture") {
+            Picasso.get().load(R.drawable.app_icon)
+                .into(viewHolder.itemView.new_message_layout_contact_picture)
+        } else {
+            Picasso.get().load(user.profileImageUrl)
+                .into(viewHolder.itemView.new_message_layout_contact_picture)
+        }
     }
 
     override fun getLayout(): Int {
